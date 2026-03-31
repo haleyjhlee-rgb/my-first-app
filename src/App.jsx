@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, PlusSquare, User, Heart, MessageCircle, Send, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, PlusSquare, User, Heart, MessageCircle, Send, Plus, Sun, Moon } from 'lucide-react';
 
 const initialPosts = [
   {
@@ -71,6 +71,17 @@ function App() {
   const [posts, setPosts] = useState(initialPosts);
   const [currentTab, setCurrentTab] = useState('home'); // 'home', 'write', 'profile'
   const [newPost, setNewPost] = useState({ title: '', content: '', category: '#오늘의배움' });
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // Assume the logged in user is "김다은"
   const currentUser = {
@@ -146,8 +157,11 @@ function App() {
         paddingLeft: '20px',
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
-        backgroundColor: '#FFFFFF',
-        marginBottom: '4px'
+        backgroundColor: 'var(--secondary-color)',
+        marginBottom: '4px',
+        position: 'sticky',
+        top: '64px',
+        zIndex: 90
       }}>
         {categories.map(cat => (
           <button
@@ -172,11 +186,11 @@ function App() {
               <img 
                 src={post.avatar} 
                 alt={post.user} 
-                style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid #F0F0F0', backgroundColor: '#F9F9F9' }} 
+                style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid var(--border-color)', backgroundColor: 'var(--gray-light)' }} 
               />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: '700', fontSize: '0.95rem', color: '#222' }}>{post.user}</span>
-                <span style={{ fontSize: '0.75rem', color: '#999', marginTop: '1px' }}>{post.timestamp}</span>
+                <span style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-color)' }}>{post.user}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '1px' }}>{post.timestamp}</span>
               </div>
             </div>
 
@@ -197,23 +211,23 @@ function App() {
               >
                 <Heart 
                   size={26} 
-                  color={post.liked ? "var(--primary-color)" : "#444"} 
+                  color={post.liked ? "var(--primary-color)" : "var(--text-color)"} 
                   fill={post.liked ? "var(--primary-color)" : "none"} 
                   strokeWidth={2} 
                   className={post.isAnimating ? 'heart-animate' : ''}
                 />
-                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--primary-color)' : '#444' }}>{post.likes}</span>
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--primary-color)' : 'var(--text-color)' }}>{post.likes}</span>
               </div>
               <div 
                 onClick={() => handleAction('댓글')}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
               >
-                <MessageCircle size={26} color="#444" strokeWidth={2} />
-                <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{post.comments}</span>
+                <MessageCircle size={26} color="var(--text-color)" strokeWidth={2} />
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-color)' }}>{post.comments}</span>
               </div>
               <Send 
                 onClick={() => handleAction('공유')}
-                size={26} color="#444" strokeWidth={2} style={{ cursor: 'pointer' }} 
+                size={26} color="var(--text-color)" strokeWidth={2} style={{ cursor: 'pointer' }} 
               />
             </div>
 
@@ -230,7 +244,7 @@ function App() {
                 marginTop: '14px', 
                 fontWeight: '700',
                 padding: '6px 12px',
-                backgroundColor: 'rgba(56, 103, 214, 0.08)',
+                backgroundColor: 'var(--tag-bg)',
                 borderRadius: '20px'
               }}>
                 {post.category}
@@ -243,8 +257,8 @@ function App() {
   );
 
   const renderWritePost = () => (
-    <div style={{ backgroundColor: '#FFFFFF', minHeight: '100%', padding: '20px' }}>
-      <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '20px', color: '#222' }}>새 게시글 작성</h2>
+    <div style={{ backgroundColor: 'var(--secondary-color)', minHeight: '100%', padding: '20px' }}>
+      <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '20px', color: 'var(--text-color)' }}>새 게시글 작성</h2>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <input 
@@ -256,9 +270,11 @@ function App() {
             width: '100%',
             padding: '14px',
             borderRadius: '8px',
-            border: '1px solid #DDD',
+            border: '1px solid var(--border-color)',
             fontSize: '1rem',
             outline: 'none',
+            backgroundColor: 'var(--gray-light)',
+            color: 'var(--text-color)'
           }}
         />
         
@@ -272,13 +288,14 @@ function App() {
               width: '100%',
               padding: '16px',
               borderRadius: 'var(--border-radius)',
-              border: '1px solid var(--gray-light)',
+              border: '1px solid var(--border-color)',
               fontSize: '1rem',
               minHeight: '200px',
               outline: 'none',
               resize: 'none',
               fontFamily: 'inherit',
-              backgroundColor: '#FBFBFC',
+              backgroundColor: 'var(--gray-light)',
+              color: 'var(--text-color)',
               transition: 'var(--transition)'
             }}
           />
@@ -287,14 +304,14 @@ function App() {
             bottom: '12px', 
             right: '12px', 
             fontSize: '0.75rem', 
-            color: newPost.content.length === 300 ? 'var(--primary-color)' : '#999' 
+            color: newPost.content.length === 300 ? 'var(--primary-color)' : 'var(--text-muted)' 
           }}>
             {newPost.content.length} / 300
           </div>
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '1rem', fontWeight: '600', marginBottom: '10px' }}>카테고리</label>
+          <label style={{ display: 'block', fontSize: '1rem', fontWeight: '600', marginBottom: '10px', color: 'var(--text-color)' }}>카테고리</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {categories.slice(1).map(cat => (
               <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
@@ -306,7 +323,7 @@ function App() {
                   onChange={() => setNewPost({...newPost, category: cat})}
                   style={{ accentColor: 'var(--primary-color)' }}
                 />
-                <span style={{ fontSize: '0.9rem', color: '#444' }}>{cat}</span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-color)' }}>{cat}</span>
               </label>
             ))}
           </div>
@@ -333,16 +350,16 @@ function App() {
     const totalLikes = myPosts.reduce((acc, curr) => acc + curr.likes, 0);
 
     return (
-      <div style={{ backgroundColor: '#F8F9FA' }}>
+      <div style={{ backgroundColor: 'var(--body-bg)', minHeight: '100%' }}>
         {/* Profile Header */}
-        <div style={{ backgroundColor: '#FFFFFF', padding: '30px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '1px solid #EEE' }}>
+        <div style={{ backgroundColor: 'var(--secondary-color)', padding: '30px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
           <img 
             src={currentUser.avatar} 
             alt="My Profile" 
-            style={{ width: '90px', height: '90px', borderRadius: '50%', border: '2px solid #EEE', marginBottom: '16px', backgroundColor: '#F9F9F9' }} 
+            style={{ width: '90px', height: '90px', borderRadius: '50%', border: '2px solid var(--border-color)', marginBottom: '16px', backgroundColor: 'var(--gray-light)' }} 
           />
-          <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#222', marginBottom: '8px' }}>{currentUser.name}</h2>
-          <p style={{ fontSize: '0.9rem', color: '#555', marginBottom: '24px' }}>{currentUser.bio}</p>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--text-color)', marginBottom: '8px' }}>{currentUser.name}</h2>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '24px' }}>{currentUser.bio}</p>
 
           {/* Stats */}
           <div style={{ display: 'flex', width: '100%', gap: '16px' }}>
@@ -358,19 +375,19 @@ function App() {
         </div>
 
         {/* My Posts Area */}
-        <div style={{ padding: '20px 16px 8px', backgroundColor: '#FFFFFF', borderBottom: '1px solid #EEE', marginTop: '8px' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#333' }}>내가 쓴 글</h3>
+        <div style={{ padding: '20px 16px 8px', backgroundColor: 'var(--secondary-color)', borderBottom: '1px solid var(--border-color)', marginTop: '8px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-color)' }}>내가 쓴 글</h3>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: '#FFFFFF' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', backgroundColor: 'var(--secondary-color)' }}>
           {myPosts.length > 0 ? myPosts.map(post => (
-            <div key={post.id} style={{ padding: '16px', borderBottom: '1px solid #F0F0F0', display: 'flex', gap: '12px' }}>
+            <div key={post.id} style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', gap: '12px' }}>
               <img src={post.image} alt="post" style={{ width: '70px', height: '70px', borderRadius: '8px', objectFit: 'cover' }} />
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#222', marginBottom: '6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {post.content}
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem', color: '#888' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Heart size={12} /> {post.likes}</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MessageCircle size={12} /> {post.comments}</span>
                   <span>{post.timestamp}</span>
@@ -378,7 +395,7 @@ function App() {
               </div>
             </div>
           )) : (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>
+            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
               작성한 게시글이 없습니다.
             </div>
           )}
@@ -392,7 +409,10 @@ function App() {
     <div className="mobile-container">
       <header className="header">
         <h1>VibeFeed</h1>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button onClick={toggleTheme} className="theme-toggle" title={isDarkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}>
+            {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          </button>
           <button 
             onClick={() => setCurrentTab('write')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}

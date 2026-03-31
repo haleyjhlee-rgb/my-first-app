@@ -3,14 +3,39 @@
   --primary-hover: #4B7BEC;
   --secondary-color: #FFFFFF;
   --bg-color: #F8F9FA;
+  --body-bg: #EDF1F5;
   --text-color: #2D3436;
+  --text-inverted: #FFFFFF;
   --text-muted: #636E72;
   --gray-light: #F1F2F6;
   --gray-dark: #2D3436;
+  --border-color: #F1F2F6;
+  --header-bg: rgba(255, 255, 255, 0.95);
   --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.03);
   --shadow-hover: 0 15px 35px rgba(56, 103, 214, 0.15);
+  --tag-bg: rgba(56, 103, 214, 0.08);
   --border-radius: 12px;
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --nav-icon-inactive: #B2BEC3;
+}
+
+[data-theme='dark'] {
+  --primary-color: #5D8BF4;
+  --primary-hover: #709BFF;
+  --secondary-color: #1E272E;
+  --bg-color: #0F172A;
+  --body-bg: #0B0E14;
+  --text-color: #F1F2F6;
+  --text-inverted: #0F172A;
+  --text-muted: #A4B0BE;
+  --gray-light: #2F3542;
+  --gray-dark: #F1F2F6;
+  --border-color: #2F3542;
+  --header-bg: rgba(30, 39, 46, 0.95);
+  --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 15px 35px rgba(93, 139, 244, 0.3);
+  --tag-bg: rgba(93, 139, 244, 0.15);
+  --nav-icon-inactive: #576574;
 }
 
 * {
@@ -18,10 +43,11 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body {
-  background-color: #EDF1F5;
+  background-color: var(--body-bg);
   color: var(--text-color);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -53,12 +79,12 @@ ul {
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--header-bg);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--gray-light);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .header h1 {
@@ -73,17 +99,17 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--header-bg);
   backdrop-filter: blur(10px);
   position: sticky;
   bottom: 0;
   z-index: 100;
-  border-top: 1px solid var(--gray-light);
+  border-top: 1px solid var(--border-color);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-item {
-  color: #B2BEC3;
+  color: var(--nav-icon-inactive);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -106,6 +132,7 @@ ul {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 40px;
+  background-color: var(--secondary-color);
 }
 
 /* Category Buttons */
@@ -121,13 +148,13 @@ ul {
 
 .category-btn.active {
   background-color: var(--primary-color);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.25);
+  color: var(--text-inverted);
+  box-shadow: 0 4px 15px rgba(56, 103, 214, 0.25);
 }
 
 .category-btn.inactive {
-  background-color: #F1F2F6;
-  color: #636E72;
+  background-color: var(--gray-light);
+  color: var(--text-muted);
 }
 
 .category-btn:hover {
@@ -137,7 +164,7 @@ ul {
 
 .category-btn.active:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.35);
+  box-shadow: 0 6px 20px rgba(56, 103, 214, 0.35);
 }
 
 /* Post Card */
@@ -145,7 +172,7 @@ ul {
   background-color: var(--secondary-color);
   transition: var(--transition);
   margin-bottom: 12px;
-  border-bottom: 8px solid var(--gray-light);
+  border-bottom: 8px solid var(--border-color);
 }
 
 .post-card:last-child {
@@ -155,7 +182,7 @@ ul {
 /* Base Button */
 .btn-primary {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--text-inverted);
   border: none;
   border-radius: var(--border-radius);
   font-weight: 700;
@@ -181,4 +208,22 @@ ul {
 
 .heart-animate {
   animation: heartPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.theme-toggle:hover {
+  background-color: var(--gray-light);
+  transform: rotate(15deg);
 }
