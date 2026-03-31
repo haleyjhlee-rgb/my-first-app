@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, PlusSquare, User, Heart, MessageCircle, Send, Plus, Sun, Moon } from 'lucide-react';
+import { Home, PlusSquare, User, Heart, MessageCircle, Send, Plus, Sun, Moon, BookOpen } from 'lucide-react';
 
 const initialPosts = [
   {
@@ -68,9 +68,17 @@ const categories = ["전체", "#오늘의배움", "#프로젝트진행", "#고�
 
 function App() {
   const [activeCategory, setActiveCategory] = useState("전체");
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState(() => {
+    const savedPosts = localStorage.getItem('vibe_posts');
+    return savedPosts ? JSON.parse(savedPosts) : initialPosts;
+  });
   const [currentTab, setCurrentTab] = useState('home'); // 'home', 'write', 'profile'
   const [newPost, setNewPost] = useState({ title: '', content: '', category: '#오늘의배움' });
+  const [guestbookEntries, setGuestbookEntries] = useState(() => {
+    const saved = localStorage.getItem('vibe_guestbook');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [newEntry, setNewEntry] = useState({ name: '', message: '' });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved === 'dark';
@@ -80,6 +88,14 @@ function App() {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('vibe_posts', JSON.stringify(posts));
+  }, [posts]);
+
+  useEffect(() => {
+    localStorage.setItem('vibe_guestbook', JSON.stringify(guestbookEntries));
+  }, [guestbookEntries]);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
@@ -211,12 +227,12 @@ function App() {
               >
                 <Heart 
                   size={26} 
-                  color={post.liked ? "var(--primary-color)" : "var(--text-color)"} 
-                  fill={post.liked ? "var(--primary-color)" : "none"} 
+                  color={post.liked ? "var(--like-color)" : "var(--text-color)"} 
+                  fill={post.liked ? "var(--like-color)" : "none"} 
                   strokeWidth={2} 
                   className={post.isAnimating ? 'heart-animate' : ''}
                 />
-                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--primary-color)' : 'var(--text-color)' }}>{post.likes}</span>
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--like-color)' : 'var(--text-color)' }}>{post.likes}</span>
               </div>
               <div 
                 onClick={() => handleAction('댓글')}
@@ -388,7 +404,9 @@ function App() {
                   {post.content}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Heart size={12} /> {post.likes}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Heart size={12} color={post.liked ? "var(--like-color)" : "var(--text-muted)"} fill={post.liked ? "var(--like-color)" : "none"} /> {post.likes}
+                  </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MessageCircle size={12} /> {post.comments}</span>
                   <span>{post.timestamp}</span>
                 </div>
@@ -397,6 +415,76 @@ function App() {
           )) : (
             <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
               작성한 게시글이 없습니다.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderGuestbook = () => {
+    const handleGuestbookSubmit = (e) => {
+      e.preventDefault();
+      if (!newEntry.name.trim() || !newEntry.message.trim()) {
+        alert("이름과 메시지를 모두 입력해주세요!");
+        return;
+      }
+      const entry = {
+        id: Date.now(),
+        name: newEntry.name,
+        message: newEntry.message,
+        timestamp: new Date().toLocaleString('ko-KR', { 
+          month: 'long', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })
+      };
+      setGuestbookEntries([entry, ...guestbookEntries]);
+      setNewEntry({ name: '', message: '' });
+    };
+
+    return (
+      <div style={{ backgroundColor: 'var(--body-bg)', minHeight: '100%' }}>
+        <div style={{ padding: '20px 20px 10px', backgroundColor: 'var(--secondary-color)' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-color)', marginBottom: '8px' }}>방명록</h2>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '20px' }}>따뜻한 한마디를 남겨주세요 ✨</p>
+        </div>
+
+        <form className="guestbook-form" onSubmit={handleGuestbookSubmit}>
+          <input 
+            type="text" 
+            placeholder="이름" 
+            className="guestbook-input"
+            value={newEntry.name}
+            onChange={(e) => setNewEntry({...newEntry, name: e.target.value})}
+          />
+          <textarea 
+            placeholder="남기고 싶은 메시지를 입력하세요" 
+            className="guestbook-textarea"
+            value={newEntry.message}
+            onChange={(e) => setNewEntry({...newEntry, message: e.target.value})}
+          />
+          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '1rem' }}>
+            작성하기
+          </button>
+        </form>
+
+        <div style={{ marginTop: '8px' }}>
+          {guestbookEntries.length > 0 ? (
+            guestbookEntries.map(entry => (
+              <div key={entry.id} className="guestbook-entry">
+                <div className="guestbook-entry-header">
+                  <span className="guestbook-entry-name">{entry.name}</span>
+                  <span className="guestbook-entry-time">{entry.timestamp}</span>
+                </div>
+                <div className="guestbook-entry-message">{entry.message}</div>
+              </div>
+            ))
+          ) : (
+            <div style={{ padding: '60px 20px', textAlign: 'center', backgroundColor: 'var(--secondary-color)' }}>
+              <BookOpen size={40} color="var(--nav-icon-inactive)" style={{ marginBottom: '16px' }} strokeWidth={1.5} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>첫 번째 메시지를 남겨보세요!</p>
             </div>
           )}
         </div>
@@ -425,6 +513,7 @@ function App() {
       <main className="main-content">
         {currentTab === 'home' && renderHomeFeed()}
         {currentTab === 'write' && renderWritePost()}
+        {currentTab === 'guestbook' && renderGuestbook()}
         {currentTab === 'profile' && renderProfile()}
       </main>
 
@@ -442,6 +531,13 @@ function App() {
         >
           <PlusSquare size={26} />
           <span style={{ marginTop: '4px' }}>글쓰기</span>
+        </div>
+        <div 
+          onClick={() => setCurrentTab('guestbook')}
+          className={`nav-item ${currentTab === 'guestbook' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
+        >
+          <BookOpen size={26} />
+          <span style={{ marginTop: '4px' }}>방명록</span>
         </div>
         <div 
           onClick={() => setCurrentTab('profile')}
