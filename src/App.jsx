@@ -139,32 +139,22 @@ function App() {
     <>
       {/* Category Filter */}
       <div style={{ 
-        padding: '16px 0', 
+        padding: '20px 0', 
         overflowX: 'auto', 
         display: 'flex', 
-        gap: '10px', 
-        paddingLeft: '16px',
+        gap: '12px', 
+        paddingLeft: '20px',
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
         backgroundColor: '#FFFFFF',
-        marginBottom: '8px'
+        marginBottom: '4px'
       }}>
         {categories.map(cat => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            style={{
-              padding: '8px 18px',
-              borderRadius: '25px',
-              border: activeCategory === cat ? 'none' : '1px solid #EEE',
-              backgroundColor: activeCategory === cat ? '#FF6B6B' : '#F8F9FA',
-              color: activeCategory === cat ? 'white' : '#666',
-              fontSize: '0.85rem',
-              fontWeight: activeCategory === cat ? '600' : '400',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
+            className={`category-btn ${activeCategory === cat ? 'active' : 'inactive'}`}
+            style={{ border: 'none' }} // remove default border if any
           >
             {cat}
           </button>
@@ -172,12 +162,10 @@ function App() {
       </div>
 
       {/* Post List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {filteredPosts.map(post => (
-          <div key={post.id} style={{ 
-            backgroundColor: '#FFFFFF', 
-            borderBottom: '1px solid #EEE',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+          <div key={post.id} className="post-card" style={{ 
+            boxShadow: 'var(--shadow-soft)'
           }}>
             {/* User Info Header: Profile Avatar + Author + Time */}
             <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', gap: '12px' }}>
@@ -209,12 +197,12 @@ function App() {
               >
                 <Heart 
                   size={26} 
-                  color={post.liked ? "#FF6B6B" : "#444"} 
-                  fill={post.liked ? "#FF6B6B" : "none"} 
+                  color={post.liked ? "var(--primary-color)" : "#444"} 
+                  fill={post.liked ? "var(--primary-color)" : "none"} 
                   strokeWidth={2} 
                   className={post.isAnimating ? 'heart-animate' : ''}
                 />
-                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? '#FF6B6B' : '#444' }}>{post.likes}</span>
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--primary-color)' : '#444' }}>{post.likes}</span>
               </div>
               <div 
                 onClick={() => handleAction('댓글')}
@@ -230,20 +218,20 @@ function App() {
             </div>
 
             {/* Post Content */}
-            <div style={{ padding: '0 16px 20px 16px' }}>
-              <div style={{ fontSize: '0.92rem', color: '#333', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
-                {post.id === Date.now() ? <h3 style={{marginBottom: '4px'}}>{post.title}</h3> : null} {/* Only for new posts */}
+            <div style={{ padding: '4px 16px 24px 16px' }}>
+              <div style={{ fontSize: '0.95rem', color: 'var(--text-color)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                {post.id === Date.now() ? <h3 style={{marginBottom: '8px', fontSize: '1.1rem'}}>{post.title}</h3> : null}
                 {post.content}
               </div>
               <div style={{ 
                 display: 'inline-block',
-                color: '#FF6B6B', 
-                fontSize: '0.85rem', 
-                marginTop: '10px', 
-                fontWeight: '600',
-                padding: '4px 8px',
-                backgroundColor: '#FFF0F0',
-                borderRadius: '4px'
+                color: 'var(--primary-color)', 
+                fontSize: '0.8rem', 
+                marginTop: '14px', 
+                fontWeight: '700',
+                padding: '6px 12px',
+                backgroundColor: 'rgba(56, 103, 214, 0.08)',
+                borderRadius: '20px'
               }}>
                 {post.category}
               </div>
@@ -282,14 +270,16 @@ function App() {
             onChange={(e) => setNewPost({...newPost, content: e.target.value})}
             style={{
               width: '100%',
-              padding: '14px',
-              borderRadius: '8px',
-              border: '1px solid #DDD',
+              padding: '16px',
+              borderRadius: 'var(--border-radius)',
+              border: '1px solid var(--gray-light)',
               fontSize: '1rem',
               minHeight: '200px',
               outline: 'none',
               resize: 'none',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              backgroundColor: '#FBFBFC',
+              transition: 'var(--transition)'
             }}
           />
           <div style={{ 
@@ -297,7 +287,7 @@ function App() {
             bottom: '12px', 
             right: '12px', 
             fontSize: '0.75rem', 
-            color: newPost.content.length === 300 ? '#FF6B6B' : '#999' 
+            color: newPost.content.length === 300 ? 'var(--primary-color)' : '#999' 
           }}>
             {newPost.content.length} / 300
           </div>
@@ -314,7 +304,7 @@ function App() {
                   value={cat} 
                   checked={newPost.category === cat}
                   onChange={() => setNewPost({...newPost, category: cat})}
-                  style={{ accentColor: '#FF6B6B' }}
+                  style={{ accentColor: 'var(--primary-color)' }}
                 />
                 <span style={{ fontSize: '0.9rem', color: '#444' }}>{cat}</span>
               </label>
@@ -324,18 +314,12 @@ function App() {
 
         <button 
           onClick={handlePostSubmit}
+          className="btn-primary"
           style={{
             width: '100%',
             padding: '16px',
-            backgroundColor: '#FF6B6B',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
             fontSize: '1.1rem',
-            fontWeight: '700',
-            marginTop: '20px',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s'
+            marginTop: '24px'
           }}
         >
           게시하기
@@ -362,13 +346,13 @@ function App() {
 
           {/* Stats */}
           <div style={{ display: 'flex', width: '100%', gap: '16px' }}>
-            <div style={{ flex: 1, backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#FF6B6B' }}>{myPosts.length}</span>
-              <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>게시글</span>
+            <div style={{ flex: 1, backgroundColor: 'var(--gray-light)', borderRadius: 'var(--border-radius)', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'var(--transition)', cursor: 'default' }}>
+              <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--primary-color)' }}>{myPosts.length}</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', marginTop: '4px' }}>게시글</span>
             </div>
-            <div style={{ flex: 1, backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#FF6B6B' }}>{totalLikes}</span>
-              <span style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>받은 좋아요</span>
+            <div style={{ flex: 1, backgroundColor: 'var(--gray-light)', borderRadius: 'var(--border-radius)', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'var(--transition)', cursor: 'default' }}>
+              <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--primary-color)' }}>{totalLikes}</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', marginTop: '4px' }}>좋아요</span>
             </div>
           </div>
         </div>
@@ -406,14 +390,14 @@ function App() {
 
   return (
     <div className="mobile-container">
-      <header className="header" style={{ padding: '0 20px' }}>
-        <h1 style={{ color: '#FF6B6B', fontSize: '1.6rem', letterSpacing: '-0.5px' }}>VibeFeed</h1>
+      <header className="header">
+        <h1>VibeFeed</h1>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <button 
             onClick={() => setCurrentTab('write')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}
           >
-            <Plus size={28} color="#333" />
+            <Plus size={28} color="var(--primary-color)" />
           </button>
         </div>
       </header>
