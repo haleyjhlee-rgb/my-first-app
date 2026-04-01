@@ -11,6 +11,10 @@ const initialPosts = [
     likes: 15,
     liked: false,
     comments: 4,
+    commentList: [
+      { id: 101, user: "이소윤", content: "와 대단해요!! 저도 처음엔 진짜 힘들었는데 ㅎㅎ", timestamp: "25분 전" },
+      { id: 102, user: "박지성", content: "축하드립니다! 어떤 API 쓰셨나요?", timestamp: "20분 전" }
+    ],
     category: "#오늘의배움",
     timestamp: "30분 전"
   },
@@ -23,6 +27,9 @@ const initialPosts = [
     likes: 32,
     liked: true,
     comments: 12,
+    commentList: [
+      { id: 201, user: "김다은", content: "다들 힘내세요!! 응원합니다 🔥", timestamp: "40분 전" }
+    ],
     category: "#프로젝트진행",
     timestamp: "1시간 전"
   },
@@ -35,6 +42,7 @@ const initialPosts = [
     likes: 8,
     liked: false,
     comments: 6,
+    commentList: [],
     category: "#고민상담",
     timestamp: "3시간 전"
   },
@@ -47,6 +55,7 @@ const initialPosts = [
     likes: 21,
     liked: false,
     comments: 2,
+    commentList: [],
     category: "#자유",
     timestamp: "5시간 전"
   },
@@ -59,6 +68,7 @@ const initialPosts = [
     likes: 19,
     liked: false,
     comments: 5,
+    commentList: [],
     category: "#오늘의배움",
     timestamp: "8시간 전"
   }
@@ -83,6 +93,8 @@ function App() {
     const saved = localStorage.getItem('theme');
     return saved === 'dark';
   });
+  const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
@@ -133,7 +145,42 @@ function App() {
     }, 300);
   };
 
-  const handleAction = (type) => {
+  const handleCommentSubmit = (postId) => {
+    const commentText = commentInputs[postId];
+    if (!commentText || !commentText.trim()) return;
+
+    const newComment = {
+      id: Date.now(),
+      user: currentUser.name,
+      content: commentText.trim(),
+      timestamp: new Date().toLocaleString('ko-KR', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+    };
+
+    setPosts(prevPosts => prevPosts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: (post.commentList?.length || 0) + 1,
+          commentList: [newComment, ...(post.commentList || [])]
+        };
+      }
+      return post;
+    }));
+
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+    setExpandedComments(prev => ({ ...prev, [postId]: true }));
+  };
+
+  const handleAction = (type, postId) => {
+    if (type === '댓글') {
+      setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+      return;
+    }
     alert(`${type} 기능은 준비 중입니다!`);
   };
 
@@ -147,10 +194,12 @@ function App() {
       user: currentUser.name,
       avatar: currentUser.avatar,
       image: `https://picsum.photos/id/${Math.floor(Math.random() * 100) + 10}/500/500`, // random image
+      title: newPost.title,
       content: newPost.content,
       likes: 0,
       liked: false,
       comments: 0,
+      commentList: [],
       category: newPost.category,
       timestamp: "방금 전"
     };
@@ -235,14 +284,14 @@ function App() {
                 <span style={{ fontWeight: '600', fontSize: '0.9rem', color: post.liked ? 'var(--like-color)' : 'var(--text-color)' }}>{post.likes}</span>
               </div>
               <div 
-                onClick={() => handleAction('댓글')}
+                onClick={() => handleAction('댓글', post.id)}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
               >
                 <MessageCircle size={26} color="var(--text-color)" strokeWidth={2} />
-                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-color)' }}>{post.comments}</span>
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-color)' }}>{post.commentList?.length || 0}</span>
               </div>
               <Send 
-                onClick={() => handleAction('공유')}
+                onClick={() => handleAction('공유', post.id)}
                 size={26} color="var(--text-color)" strokeWidth={2} style={{ cursor: 'pointer' }} 
               />
             </div>
@@ -250,7 +299,7 @@ function App() {
             {/* Post Content */}
             <div style={{ padding: '4px 16px 24px 16px' }}>
               <div style={{ fontSize: '0.95rem', color: 'var(--text-color)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                {post.id === Date.now() ? <h3 style={{marginBottom: '8px', fontSize: '1.1rem'}}>{post.title}</h3> : null}
+                {post.title ? <h3 style={{marginBottom: '8px', fontSize: '1.1rem'}}>{post.title}</h3> : null}
                 {post.content}
               </div>
               <div style={{ 
@@ -266,6 +315,83 @@ function App() {
                 {post.category}
               </div>
             </div>
+
+            {/* Comments Section */}
+            {(expandedComments[post.id] || (post.commentList && post.commentList.length > 0)) && (
+              <div className="comment-section" style={{ 
+                padding: '0 16px 16px 16px',
+                borderTop: '1px solid var(--border-color)',
+                backgroundColor: 'var(--secondary-color)'
+              }}>
+                {post.commentList && post.commentList.length > 0 && (
+                  <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {post.commentList.slice(0, expandedComments[post.id] ? post.commentList.length : 2).map(comment => (
+                      <div key={comment.id} style={{ display: 'flex', gap: '8px', fontSize: '0.85rem' }}>
+                        <span style={{ fontWeight: '700', color: 'var(--text-color)', whiteSpace: 'nowrap' }}>{comment.user}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ color: 'var(--text-color)' }}>{comment.content}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>{comment.timestamp}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {!expandedComments[post.id] && post.commentList.length > 2 && (
+                      <button 
+                        onClick={() => setExpandedComments(prev => ({ ...prev, [post.id]: true }))}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'left', padding: '4px 0', cursor: 'pointer' }}
+                      >
+                        댓글 {post.commentList.length - 2}개 더 보기...
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Comment Input */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px' }}>
+                  <img 
+                    src={currentUser.avatar} 
+                    alt="Current User" 
+                    style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--gray-light)' }} 
+                  />
+                  <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      placeholder="댓글 달기..." 
+                      className="comment-input-field"
+                      value={commentInputs[post.id] || ''}
+                      onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit(post.id)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 40px 10px 12px',
+                        borderRadius: '20px',
+                        border: '1px solid var(--border-color)',
+                        fontSize: '0.85rem',
+                        outline: 'none',
+                        backgroundColor: 'var(--gray-light)',
+                        color: 'var(--text-color)'
+                      }}
+                    />
+                    <button 
+                      onClick={() => handleCommentSubmit(post.id)}
+                      disabled={!commentInputs[post.id]?.trim()}
+                      style={{ 
+                        position: 'absolute', 
+                        right: '12px', 
+                        background: 'none', 
+                        border: 'none', 
+                        color: commentInputs[post.id]?.trim() ? 'var(--primary-color)' : 'var(--text-muted)',
+                        fontWeight: '700',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        padding: '4px'
+                      }}
+                    >
+                      게시
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -407,7 +533,7 @@ function App() {
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Heart size={12} color={post.liked ? "var(--like-color)" : "var(--text-muted)"} fill={post.liked ? "var(--like-color)" : "none"} /> {post.likes}
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MessageCircle size={12} /> {post.comments}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MessageCircle size={12} /> {post.commentList?.length || 0}</span>
                   <span>{post.timestamp}</span>
                 </div>
               </div>
